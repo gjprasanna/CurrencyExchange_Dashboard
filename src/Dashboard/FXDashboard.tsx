@@ -1,9 +1,12 @@
 
-
 // import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 // import { ChevronDown, Search, TrendingUp, TrendingDown, Minus, RefreshCw, AlertCircle } from 'lucide-react';
 
 // const API_BASE = 'http://localhost:8080';
+
+
+// // To this:
+// // const API_BASE = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080';
 
 // // ==================== INTERFACES ====================
 // interface Currency {
@@ -44,11 +47,11 @@
 //   lastUpdated: string;
 // }
 
-// // ==================== POSITION PANEL COMPONENT (UPDATED) ====================
+// // ==================== POSITION PANEL COMPONENT ====================
 // const PositionPanel: React.FC<{ activeBuy: string; activeSell: string }> = ({ activeBuy, activeSell }) => {
 //   const [positions, setPositions] = useState<CurrencyPosition[]>([]);
 //   const [isLoading, setIsLoading] = useState(true);
-//   const [error, setError] = useState<string | null>(null);
+//  const [_error, setError] = useState<string | null>(null);
 
 //   const fetchPositions = async () => {
 //     setIsLoading(true);
@@ -82,7 +85,6 @@
 //     switch (status.toUpperCase()) {
 //       case 'LONG': return { bg: '#ecfdf5', color: '#059669', border: '#10b981', icon: '📈', label: 'LONG' };
 //       case 'SHORT': return { bg: '#fef2f2', color: '#dc2626', border: '#ef4444', icon: '📉', label: 'SHORT' };
-//       // case 'NEUTRAL': return { bg: '#f3f4f6', color: '#6b7280', border: '#9ca3af', icon: '➖', label: 'NEUTRAL' };
 //       default: return { bg: '#f9fafb', color: '#4b5563', border: '#d1d5db', icon: '❓', label: status };
 //     }
 //   };
@@ -91,7 +93,7 @@
 //     <div style={{
 //       width: '100%', maxWidth: '450px', backgroundColor: 'white', borderRadius: '16px',
 //       boxShadow: '0 4px 20px rgba(0,0,0,0.1)', padding: '30px', display: 'flex', 
-//       flexDirection: 'column', height: '850px' // Fixed height to enable scrolling
+//       flexDirection: 'column', height: '850px'
 //     }}>
 //       <div style={{ marginBottom: '15px', paddingBottom: '12px', borderBottom: '2px solid #e5e7eb' }}>
 //         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
@@ -163,7 +165,7 @@
 //   );
 // };
 
-// // ==================== RATE COMPARISON COMPONENT (UNCHANGED) ====================
+// // ==================== RATE COMPARISON COMPONENT ====================
 // const RateWithComparison: React.FC<{
 //   label: string; currentRate: number; difference: number | null; percentChange: number | null; hasHistory: boolean;
 // }> = ({ label, currentRate, difference, percentChange, hasHistory }) => {
@@ -190,7 +192,7 @@
 //   );
 // };
 
-// // ==================== DROPDOWN COMPONENT (UNCHANGED) ====================
+// // ==================== DROPDOWN COMPONENT ====================
 // const SearchableDropdown: React.FC<{
 //   currencies: Currency[]; value: string; onChange: (code: string) => void; label: string; isBuySide: boolean;
 // }> = ({ currencies, value, onChange, label, isBuySide }) => {
@@ -249,21 +251,21 @@
 //   const [buyCode, setBuyCode] = useState<string>(() => sessionStorage.getItem('fxBuyCode') || 'USD');
 //   const [sellCode, setSellCode] = useState<string>(() => sessionStorage.getItem('fxSellCode') || 'EUR');
 //   const [customerRate, setCustomerRate] = useState<string>('');
+//   const [isUserEditing, setIsUserEditing] = useState(false); // ← NEW: Track if user is manually editing
 //   const [result, setResult] = useState<ConversionResponse | null>(null);
-//   const [isLoading, setIsLoading] = useState(false);
+//   const [_isLoading, setIsLoading] = useState(false);//jan29
 //   const [error, setError] = useState<string | null>(null);
 //   const [isRefreshing, setIsRefreshing] = useState(false);
 //   const latestRequestRef = useRef(0);
 //   const abortControllerRef = useRef<AbortController | null>(null);
 
-//    useEffect(() => {
+//   useEffect(() => {
 //     sessionStorage.setItem('fxBuyCode', buyCode);
 //   }, [buyCode]);
 
 //   useEffect(() => {
 //     sessionStorage.setItem('fxSellCode', sellCode);
 //   }, [sellCode]);
-
 
 //   const fetchCurrencies = useCallback(async () => {
 //     setIsRefreshing(true); setError(null);
@@ -288,12 +290,9 @@
 
 //     // 2. SAME CURRENCY LOGIC (e.g., USD to USD)
 //     if (buyCode === sellCode) {
-//       // Determine what rate to use:
-//       // If the user is typing manually, parse their input. Otherwise, default to 1.0
 //       const manualInput = parseFloat(customerRate);
 //       const activeRate = isManualRate && !isNaN(manualInput) ? manualInput : 1.0;
       
-//       // Stop calculation if manual rate is 0 or invalid to prevent weird UI states
 //       if (isManualRate && activeRate <= 0) {
 //         setIsLoading(false);
 //         return;
@@ -304,17 +303,16 @@
 //         sellCode,
 //         inputAmount: numAmount,
 //         conversionRate: 1.0,
-//          tradingDate: new Date().toISOString().split('T')[0],
-//         finalAmount: numAmount, // Apply the custom rate even for same currency
+//         tradingDate: new Date().toISOString().split('T')[0],
+//         finalAmount: numAmount,
 //         treasuryRate: 1.0,
 //         customerRate: activeRate,
-//         spread: activeRate - 1.0, // Shows profit/loss relative to 1:1
+//         spread: activeRate - 1.0,
 //         pnlStatus: activeRate > 1.0 ? 'PROFIT' : activeRate < 1.0 ? 'LOSS' : 'NEUTRAL'
 //       });
 
-//       // Only update the input box to "1.000000" if this WAS NOT a manual edit
-//       // (e.g., the user just selected USD/USD for the first time)
 //       if (!isManualRate) {
+//         setIsUserEditing(false); // ← UPDATED: Mark as API change
 //         setCustomerRate("1.000000");
 //       }
       
@@ -323,7 +321,6 @@
 //     }
 
 //     // 3. EXTERNAL API CALCULATION (e.g., USD to EUR)
-//     // Guard: Don't send invalid manual rates to the server
 //     if (isManualRate && (parseFloat(customerRate) <= 0 || isNaN(parseFloat(customerRate)))) {
 //       return;
 //     }
@@ -351,12 +348,11 @@
 //       if (currentRequestId === latestRequestRef.current) {
 //         setResult(data);
         
-//         // CRITICAL LOOP PROTECTION: 
-//         // Only update the input box if the API returned a new value 
-//         // AND the user isn't currently typing in it.
-//         if (!isManualRate && !customerRate) {
-//   setCustomerRate(data.customerRate.toString());
-// }
+//         // ← UPDATED: Only auto-fill if NOT a manual edit
+//         if (!isManualRate) {
+//           setIsUserEditing(false); // Mark as API change
+//           setCustomerRate(data.customerRate.toString());
+//         }
 //       }
 //     } catch (e: any) {
 //       if (e.name !== 'AbortError') setError(e.message);
@@ -374,12 +370,13 @@
 //   }, [amount, buyCode, sellCode]);
 
 //   // EFFECT 2: Manual trigger (Customer Rate typing)
+//   // ← UPDATED: Only trigger if user is manually editing
 //   useEffect(() => {
-//     if (!customerRate) return;
+//     if (!customerRate || !isUserEditing) return; // Check both conditions
 //     const reqId = ++latestRequestRef.current;
 //     const timer = setTimeout(() => performCalculation(reqId, true), 500);
 //     return () => clearTimeout(timer);
-//   }, [customerRate]);
+//   }, [customerRate, isUserEditing]); // Watch both dependencies
 
 //   const getPnlStyles = (status: string) => {
 //     switch (status) {
@@ -404,56 +401,53 @@
 //       {/* LEFT: Exchange Calculator */}
 //       <div style={{ width: '100%', maxWidth: '850px', backgroundColor: 'white', borderRadius: '16px', boxShadow: '0 4px 20px rgba(0,0,0,0.1)', padding: '30px', position: 'relative' }}>
         
-//      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
-//   <h1 style={{ fontSize: '26px', fontWeight: '700', color: '#111827', margin: 0 }}>Currency Exchange</h1>
-  
-//   <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-//     {result && (
-//       <div style={{
-//         padding: '8px 16px',
-//         backgroundColor: '#f0fdf4',
-//         borderRadius: '8px',
-//         border: '1px solid #bbf7d0'
-//       }}>
-//         <div style={{ fontSize: '11px', color: '#15803d', fontWeight: '600' }}>
-//           💰 TRADING RATES
+//         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
+//           <h1 style={{ fontSize: '26px', fontWeight: '700', color: '#111827', margin: 0 }}>Currency Exchange</h1>
+          
+//           <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+//             {result && (
+//               <div style={{
+//                 padding: '8px 16px',
+//                 backgroundColor: '#f0fdf4',
+//                 borderRadius: '8px',
+//                 border: '1px solid #bbf7d0'
+//               }}>
+//                 <div style={{ fontSize: '11px', color: '#15803d', fontWeight: '600' }}>
+//                   💰 TRADING RATES
+//                 </div>
+//                 <div style={{ fontSize: '14px', color: '#166534', fontWeight: '700' }}>
+//                   {new Date(result.tradingDate).toLocaleDateString('en-GB', { 
+//                     day: 'numeric', 
+//                     month: 'short', 
+//                     year: 'numeric' 
+//                   })}
+//                 </div>
+//               </div>
+//             )}
+            
+//             <button 
+//               onClick={() => { latestRequestRef.current++; fetchCurrencies(); }} 
+//               disabled={isRefreshing} 
+//               aria-label="Refresh exchange rates"
+//               style={{ 
+//                 padding: '8px', 
+//                 borderRadius: '50%', 
+//                 border: '1px solid #d1d5db', 
+//                 backgroundColor: 'white', 
+//                 cursor: isRefreshing ? 'not-allowed' : 'pointer', 
+//                 color: '#4f46e5',
+//                 transition: 'all 0.2s',
+//                 display: 'flex',
+//                 alignItems: 'center',
+//                 justifyContent: 'center'
+//               }}
+//             >
+//               <RefreshCw size={16} style={{ animation: isRefreshing ? 'spin 1s linear infinite' : 'none' }} />
+//             </button>
+//           </div>
 //         </div>
-//         <div style={{ fontSize: '14px', color: '#166534', fontWeight: '700' }}>
-//           {new Date(result.tradingDate).toLocaleDateString('en-GB', { 
-//             day: 'numeric', 
-//             month: 'short', 
-//             year: 'numeric' 
-//           })}
-//         </div>
-//       </div>
-//     )}
-    
-//     <button 
-//       onClick={() => { latestRequestRef.current++; fetchCurrencies(); }} 
-//       disabled={isRefreshing} 
-//       aria-label="Refresh exchange rates"
-//       style={{ 
-//         padding: '8px', 
-//         borderRadius: '50%', 
-//         border: '1px solid #d1d5db', 
-//         backgroundColor: 'white', 
-//         cursor: isRefreshing ? 'not-allowed' : 'pointer', 
-//         color: '#4f46e5',
-//         transition: 'all 0.2s',
-//         display: 'flex',
-//         alignItems: 'center',
-//         justifyContent: 'center'
-//       }}
-//     >
-//       <RefreshCw size={16} style={{ animation: isRefreshing ? 'spin 1s linear infinite' : 'none' }} />
-//     </button>
-//   </div>
-// </div>
 
-// {error && <div style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '12px 16px', marginBottom: '20px', backgroundColor: '#fef2f2', border: '1px solid #fecaca', borderRadius: '8px', color: '#dc2626' }}><AlertCircle size={18} /><span style={{ fontSize: '14px', fontWeight: '500' }}>{error}</span></div>}
-
-
-
+//         {error && <div style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '12px 16px', marginBottom: '20px', backgroundColor: '#fef2f2', border: '1px solid #fecaca', borderRadius: '8px', color: '#dc2626' }}><AlertCircle size={18} /><span style={{ fontSize: '14px', fontWeight: '500' }}>{error}</span></div>}
 
 //         <div style={{ marginBottom: '20px' }}>
 //           <label style={{ display: 'block', fontSize: '16px', fontWeight: '700', color: '#4f46e5', marginBottom: '6px' }}>Transaction Amount</label>
@@ -461,8 +455,28 @@
 //         </div>
 
 //         <div style={{ display: 'flex', gap: '24px', marginBottom: '24px', alignItems: 'flex-start' }}>
-//           <SearchableDropdown currencies={currencies} value={buyCode} onChange={(c) => { setCustomerRate(''); setBuyCode(c); }} label="Buy Currency" isBuySide={true} />
-//           <SearchableDropdown currencies={currencies} value={sellCode} onChange={(c) => { setCustomerRate(''); setSellCode(c); }} label="Sell Currency" isBuySide={false} />
+//           <SearchableDropdown 
+//             currencies={currencies} 
+//             value={buyCode} 
+//             onChange={(c) => { 
+//               setCustomerRate(''); 
+//               setIsUserEditing(false); // ← UPDATED: Reset flag on currency change
+//               setBuyCode(c); 
+//             }} 
+//             label="Buy Currency" 
+//             isBuySide={true} 
+//           />
+//           <SearchableDropdown 
+//             currencies={currencies} 
+//             value={sellCode} 
+//             onChange={(c) => { 
+//               setCustomerRate(''); 
+//               setIsUserEditing(false); // ← UPDATED: Reset flag on currency change
+//               setSellCode(c); 
+//             }} 
+//             label="Sell Currency" 
+//             isBuySide={false} 
+//           />
 //         </div>
 
 //         {!result ? (
@@ -471,7 +485,8 @@
 //             <p style={{ fontWeight: '600' }}>LOADING LIVE RATES...</p>
 //           </div>
 //         ) : (
-//           <div style={{ opacity: isLoading ? 0.6 : 1 }}>
+//           // jan29
+//           <div style={{ opacity: 1 }}>  
 //             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '16px', padding: '16px', background: 'linear-gradient(135deg, #eef2ff 0%, #e0e7ff 100%)', borderRadius: '12px', border: '2px solid #c7d2fe' }}>
 //               <div style={{ textAlign: 'center' }}>
 //                 <div style={{ fontSize: '13px', fontWeight: '700', color: '#4f46e5', textTransform: 'uppercase', marginBottom: '6px' }}>Treasury Rate</div>
@@ -480,7 +495,16 @@
 //               </div>
 //               <div style={{ textAlign: 'center' }}>
 //                 <div style={{ fontSize: '13px', fontWeight: '700', color: '#4f46e5', textTransform: 'uppercase', marginBottom: '6px' }}>Customer Rate (Editable)</div>
-//                 <input type="number" step="0.000001" value={customerRate} onChange={(e) => setCustomerRate(e.target.value)} style={{ width: '100%', fontSize: '20px', fontWeight: '700', color: '#111827', textAlign: 'center', backgroundColor: 'white', border: '2px solid #818cf8', borderRadius: '8px', padding: '6px', outline: 'none' }} />
+//                 <input 
+//                   type="number" 
+//                   step="0.000001" 
+//                   value={customerRate} 
+//                   onChange={(e) => {
+//                     setIsUserEditing(true); // ← UPDATED: Mark as user edit
+//                     setCustomerRate(e.target.value);
+//                   }} 
+//                   style={{ width: '100%', fontSize: '20px', fontWeight: '700', color: '#111827', textAlign: 'center', backgroundColor: 'white', border: '2px solid #818cf8', borderRadius: '8px', padding: '6px', outline: 'none' }} 
+//                 />
 //               </div>
 //             </div>
 
@@ -508,7 +532,7 @@
 //         )}
 //       </div>
 
-//       {/* RIGHT: Position Panel with Manager's Sorting Logic */}
+//       {/* RIGHT: Position Panel */}
 //       <PositionPanel activeBuy={buyCode} activeSell={sellCode} />
 
 //       <style>{`
@@ -522,7 +546,6 @@
 // };
 
 // export default FXDashboard;
-
 
 import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { ChevronDown, Search, TrendingUp, TrendingDown, Minus, RefreshCw, AlertCircle } from 'lucide-react';
@@ -562,7 +585,8 @@ interface ConversionResponse {
   customerRate: number;
   spread: number;
   pnlStatus: string;
-  tradingDate: string; 
+  tradingDate: string;
+  marginValue: number; // ← NEW FIELD
 }
 
 interface CurrencyPosition {
@@ -619,7 +643,7 @@ const PositionPanel: React.FC<{ activeBuy: string; activeSell: string }> = ({ ac
       width: '100%', maxWidth: '450px', backgroundColor: 'white', borderRadius: '16px',
       boxShadow: '0 4px 20px rgba(0,0,0,0.1)', padding: '30px', display: 'flex', 
       flexDirection: 'column', height: '850px'
-    }}>
+    }} className="position-panel">
       <div style={{ marginBottom: '15px', paddingBottom: '12px', borderBottom: '2px solid #e5e7eb' }}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
           <h2 style={{ fontSize: '20px', fontWeight: '700', color: '#111827', margin: 0 }}>Positions</h2>
@@ -778,7 +802,7 @@ const FXDashboard: React.FC = () => {
   const [customerRate, setCustomerRate] = useState<string>('');
   const [isUserEditing, setIsUserEditing] = useState(false); // ← NEW: Track if user is manually editing
   const [result, setResult] = useState<ConversionResponse | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
+  const [_isLoading, setIsLoading] = useState(false);//jan29
   const [error, setError] = useState<string | null>(null);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const latestRequestRef = useRef(0);
@@ -823,6 +847,9 @@ const FXDashboard: React.FC = () => {
         return;
       }
 
+      const spread = activeRate - 1.0;
+      const marginValue = numAmount * spread;
+
       setResult({
         buyCode,
         sellCode,
@@ -832,8 +859,9 @@ const FXDashboard: React.FC = () => {
         finalAmount: numAmount,
         treasuryRate: 1.0,
         customerRate: activeRate,
-        spread: activeRate - 1.0,
-        pnlStatus: activeRate > 1.0 ? 'PROFIT' : activeRate < 1.0 ? 'LOSS' : 'NEUTRAL'
+        spread: spread,
+        pnlStatus: activeRate > 1.0 ? 'PROFIT' : activeRate < 1.0 ? 'LOSS' : 'NEUTRAL',
+        marginValue: marginValue
       });
 
       if (!isManualRate) {
@@ -921,12 +949,12 @@ const FXDashboard: React.FC = () => {
   })();
 
   return (
-    <div style={{ minHeight: '98vh', fontFamily: "'Roboto', sans-serif", background: 'linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px', gap: '30px' }}>
+    <div className="dashboard-container" style={{ minHeight: '98vh', fontFamily: "'Roboto', sans-serif", background: 'linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px', gap: '30px' }}>
       
       {/* LEFT: Exchange Calculator */}
-      <div style={{ width: '100%', maxWidth: '850px', backgroundColor: 'white', borderRadius: '16px', boxShadow: '0 4px 20px rgba(0,0,0,0.1)', padding: '30px', position: 'relative' }}>
+      <div className="exchange-panel" style={{ width: '100%', maxWidth: '850px', backgroundColor: 'white', borderRadius: '16px', boxShadow: '0 4px 20px rgba(0,0,0,0.1)', padding: '30px', position: 'relative' }}>
         
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }} className="header-section">
           <h1 style={{ fontSize: '26px', fontWeight: '700', color: '#111827', margin: 0 }}>Currency Exchange</h1>
           
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
@@ -979,7 +1007,7 @@ const FXDashboard: React.FC = () => {
           <input type="number" value={amount} onChange={(e) => { setResult(null); setAmount(e.target.value); }} min="0" step="0.01" style={{ width: '100%', padding: '12px 14px', fontSize: '16px', fontWeight: '600', color: '#111827', backgroundColor: '#f3f4f6', border: '1px solid #d1d5db', borderRadius: '8px', outline: 'none', boxSizing: 'border-box' }} />
         </div>
 
-        <div style={{ display: 'flex', gap: '24px', marginBottom: '24px', alignItems: 'flex-start' }}>
+        <div className="dropdowns-container" style={{ display: 'flex', gap: '24px', marginBottom: '24px', alignItems: 'flex-start' }}>
           <SearchableDropdown 
             currencies={currencies} 
             value={buyCode} 
@@ -1010,8 +1038,9 @@ const FXDashboard: React.FC = () => {
             <p style={{ fontWeight: '600' }}>LOADING LIVE RATES...</p>
           </div>
         ) : (
-          <div style={{ opacity: isLoading ? 0.6 : 1 }}>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '16px', padding: '16px', background: 'linear-gradient(135deg, #eef2ff 0%, #e0e7ff 100%)', borderRadius: '12px', border: '2px solid #c7d2fe' }}>
+          // jan29
+          <div style={{ opacity: 1 }}>  
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '16px', padding: '16px', background: 'linear-gradient(135deg, #eef2ff 0%, #e0e7ff 100%)', borderRadius: '12px', border: '2px solid #c7d2fe' }} className="rates-grid">
               <div style={{ textAlign: 'center' }}>
                 <div style={{ fontSize: '13px', fontWeight: '700', color: '#4f46e5', textTransform: 'uppercase', marginBottom: '6px' }}>Treasury Rate</div>
                 <div style={{ fontSize: '20px', fontWeight: '700', color: '#111827', marginBottom: '4px' }}>{result.treasuryRate.toFixed(6)}</div>
@@ -1032,14 +1061,26 @@ const FXDashboard: React.FC = () => {
               </div>
             </div>
 
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '18px', padding: '16px', backgroundColor: '#f8fafc', borderRadius: '8px', border: '1px dashed #cbd5e1' }}>
+            {/* ← UPDATED: Changed to 3-column grid for Margin Spread, P&L Status, and Margin Value */}
+            <div className="pnl-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '16px', marginBottom: '18px', padding: '16px', backgroundColor: '#f8fafc', borderRadius: '8px', border: '1px dashed #cbd5e1' }}>
               <div style={{ textAlign: 'center', borderRight: '1px solid #e2e8f0' }}>
                 <div style={{ fontSize: '13px', fontWeight: '800', color: '#64748b', textTransform: 'uppercase' }}>Margin Spread</div>
                 <div style={{ fontSize: '17px', fontWeight: '700', color: getPnlStyles(result.pnlStatus).color }}>{result.spread.toFixed(6)}</div>
               </div>
-              <div style={{ textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+              <div style={{ textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center', borderRight: '1px solid #e2e8f0' }}>
                 <div style={{ fontSize: '13px', fontWeight: '800', color: '#64748b', textTransform: 'uppercase', marginBottom: '2px' }}>P&L Status</div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '4px', padding: '2px 10px', borderRadius: '20px', fontSize: '15px', fontWeight: '800', color: getPnlStyles(result.pnlStatus).color, backgroundColor: getPnlStyles(result.pnlStatus).bg, border: `1px solid ${getPnlStyles(result.pnlStatus).border}` }}>{getPnlStyles(result.pnlStatus).icon} {result.pnlStatus}</div>
+              </div>
+              {/* ← NEW: Margin Value Section */}
+              <div style={{ textAlign: 'center' }}>
+                <div style={{ fontSize: '13px', fontWeight: '800', color: '#64748b', textTransform: 'uppercase' }}>Value</div>
+                <div style={{ 
+                  fontSize: '17px', 
+                  fontWeight: '700', 
+                  color: result.marginValue >= 0 ? '#059669' : '#dc2626' 
+                }}>
+                  {result.marginValue >= 0 ? '+' : ''}{result.marginValue.toFixed(4)}
+                </div>
               </div>
             </div>
 
@@ -1063,6 +1104,75 @@ const FXDashboard: React.FC = () => {
         @keyframes spin { 
           from { transform: rotate(0deg); } 
           to { transform: rotate(360deg); } 
+        }
+
+        /* Mobile Responsive Styles */
+        @media (max-width: 1200px) {
+          .dashboard-container {
+            flex-direction: column !important;
+            padding: 15px !important;
+          }
+
+          .exchange-panel {
+            max-width: 100% !important;
+            padding: 20px !important;
+          }
+
+          .position-panel {
+            max-width: 100% !important;
+            height: auto !important;
+            min-height: 400px !important;
+          }
+
+          .header-section {
+            flex-direction: column !important;
+            align-items: flex-start !important;
+            gap: 12px !important;
+          }
+
+          .header-section h1 {
+            font-size: 22px !important;
+          }
+
+          .dropdowns-container {
+            flex-direction: column !important;
+            gap: 16px !important;
+          }
+
+          .rates-grid {
+            grid-template-columns: 1fr !important;
+            gap: 12px !important;
+          }
+
+          .pnl-grid {
+            grid-template-columns: 1fr !important;
+            gap: 12px !important;
+          }
+
+          .pnl-grid > div {
+            border-right: none !important;
+            border-bottom: 1px solid #e2e8f0;
+            padding-bottom: 12px;
+          }
+
+          .pnl-grid > div:last-child {
+            border-bottom: none !important;
+            padding-bottom: 0;
+          }
+        }
+
+        @media (max-width: 480px) {
+          .exchange-panel {
+            padding: 15px !important;
+          }
+
+          .header-section h1 {
+            font-size: 20px !important;
+          }
+
+          .position-panel {
+            padding: 20px !important;
+          }
         }
       `}</style>
     </div>
