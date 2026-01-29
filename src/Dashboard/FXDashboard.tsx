@@ -576,7 +576,7 @@ interface CurrencyPosition {
 const PositionPanel: React.FC<{ activeBuy: string; activeSell: string }> = ({ activeBuy, activeSell }) => {
   const [positions, setPositions] = useState<CurrencyPosition[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+ const [_error, setError] = useState<string | null>(null);
 
   const fetchPositions = async () => {
     setIsLoading(true);
