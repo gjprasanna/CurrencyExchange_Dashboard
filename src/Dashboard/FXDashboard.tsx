@@ -125,7 +125,7 @@ const PositionPanel: React.FC<{
       <div 
         key={pos.id} 
         style={{ 
-          padding: '16px 20px',
+          padding: '14px 20px',
           backgroundColor: s.bg,
           border: isActive ? `2px solid #4f46e5` : `1px solid ${s.border}`,
           borderRadius: '8px',
@@ -272,7 +272,7 @@ const PositionPanel: React.FC<{
   return (
     <div style={{
       width: '100%', 
-      maxWidth: '550px', 
+      maxWidth: '690px', 
       backgroundColor: 'white', 
       borderRadius: '16px',
       boxShadow: '0 4px 20px rgba(0,0,0,0.1)', 
