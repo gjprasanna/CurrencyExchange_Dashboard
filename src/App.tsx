@@ -41,6 +41,7 @@ import DashboardLayout from './components/layout/DashboardLayout';
 import CurrencyExchange from './pages/CurrencyExchange';
 import CustomerTransactions from './pages/CustomerTransactions';
 import RateManagement from './pages/RateManagement';
+import PositionManagement from './pages/PositionManagementPage';
 
 const App: React.FC = () => (
   <Router>
@@ -50,6 +51,7 @@ const App: React.FC = () => (
         <Route path="currency-exchange"     element={<CurrencyExchange />} />
         <Route path="customer-transactions" element={<CustomerTransactions />} />
         <Route path="rate-management"       element={<RateManagement />} />
+          <Route path="position-management"   element={<PositionManagement />} />
         <Route path="*" element={<Navigate to="/currency-exchange" replace />} />
       </Route>
     </Routes>

@@ -3,7 +3,8 @@
 import React, { useState, useEffect } from 'react';
 import { Search, Filter, TrendingUp, TrendingDown, Minus, RefreshCw, X } from 'lucide-react';
 
-const API_BASE = 'http://localhost:8080';
+//const API_BASE = 'http://localhost:8080';
+const API_BASE = import.meta.env.VITE_API_BASE_URL;
 
 // ==================== INTERFACES ====================
 interface FXTransaction {
