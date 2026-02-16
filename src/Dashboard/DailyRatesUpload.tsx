@@ -3,7 +3,8 @@ import * as XLSX from 'xlsx';
 import Papa from 'papaparse';
 import { Upload, RefreshCw, CheckCircle, XCircle, Download, AlertTriangle, Database, Clock, FileText, FileSpreadsheet } from 'lucide-react';
 
-const API_BASE = 'http://localhost:8080';
+// const API_BASE =  'http://localhost:8080';
+const API_BASE = import.meta.env.VITE_API_BASE_URL;
 
 // ==================== INTERFACES ====================
 interface CurrencyRate {

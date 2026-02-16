@@ -4,7 +4,8 @@ import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { ChevronDown, Search, TrendingUp, TrendingDown, Minus, RefreshCw, AlertCircle } from 'lucide-react';
 
 // ==================== CONFIGURATION ====================
-const API_BASE = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080';
+// const API_BASE =  'http://localhost:8080';
+const API_BASE = import.meta.env.VITE_API_BASE_URL;
 const POLLING_INTERVAL = 30000; // 30 seconds
 const CUSTOMER_RATE_DEBOUNCE = 500; // ms
 
