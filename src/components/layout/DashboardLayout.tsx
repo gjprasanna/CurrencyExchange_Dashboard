@@ -57,7 +57,7 @@ const DashboardLayout: React.FC = () => {
         padding: '40px',
         boxSizing: 'border-box',
         width: 'calc(100vw - 230px)',
-        marginLeft: '200px',
+        marginLeft: '230px',
         overflowX: 'auto'
       }}>
         <Outlet />
